@@ -106,10 +106,10 @@ impl KeyExchange {
 
     pub fn complete(self, peer: &[u8]) -> Option<KeyExchangeResult> {
         let peer_key = ring::agreement::UnparsedPublicKey::new(self.alg, peer);
-        let secret = ring::agreement::agree_ephemeral(self.privkey, &peer_key, (), |v| {
+        let secret = ring::agreement::agree_ephemeral(self.privkey, &peer_key, |v| {
             let mut r = Vec::new();
             r.extend_from_slice(v);
-            Ok(r)
+            r
         });
 
         if secret.is_err() {
@@ -557,20 +557,16 @@ mod test {
 
     #[test]
     fn test_pref_fails() {
-        assert!(
-            choose_ciphersuite_preferring_client(
-                &[CipherSuite::TLS_NULL_WITH_NULL_NULL],
-                &ALL_CIPHERSUITES
-            )
-            .is_none()
-        );
-        assert!(
-            choose_ciphersuite_preferring_server(
-                &[CipherSuite::TLS_NULL_WITH_NULL_NULL],
-                &ALL_CIPHERSUITES
-            )
-            .is_none()
-        );
+        assert!(choose_ciphersuite_preferring_client(
+            &[CipherSuite::TLS_NULL_WITH_NULL_NULL],
+            &ALL_CIPHERSUITES
+        )
+        .is_none());
+        assert!(choose_ciphersuite_preferring_server(
+            &[CipherSuite::TLS_NULL_WITH_NULL_NULL],
+            &ALL_CIPHERSUITES
+        )
+        .is_none());
     }
 
     #[test]
@@ -607,17 +603,11 @@ mod test {
     fn test_can_resume_to() {
         assert!(TLS13_CHACHA20_POLY1305_SHA256.can_resume_to(&TLS13_AES_128_GCM_SHA256));
         assert!(!TLS13_CHACHA20_POLY1305_SHA256.can_resume_to(&TLS13_AES_256_GCM_SHA384));
-        assert!(
-            !TLS13_CHACHA20_POLY1305_SHA256
-                .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
-        );
-        assert!(
-            !TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-                .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
-        );
-        assert!(
-            TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
-                .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256)
-        );
+        assert!(!TLS13_CHACHA20_POLY1305_SHA256
+            .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256));
+        assert!(!TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+            .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256));
+        assert!(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+            .can_resume_to(&TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256));
     }
 }

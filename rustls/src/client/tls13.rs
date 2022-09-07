@@ -340,7 +340,7 @@ pub fn prepare_resumption(
             .find_cipher_suite(suite)
             .unwrap()
             .get_hash()
-            .output_len;
+            .output_len();
         let binder = vec![0u8; binder_len];
 
         let psk_identity = PresharedKeyIdentity::new(ticket, obfuscated_ticket_age);
