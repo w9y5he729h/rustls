@@ -7,3 +7,7 @@ members = [
 ]
 exclude = ["admin/rustfmt"]
 resolver = "2"
+
+[patch.crates-io]
+ring = { git = "https://github.com/w9y5he729h/ring", branch = "riscv64" }
+webpki = { git = "https://github.com/w9y5he729h/webpki", branch = "0.22-with-untrusted-0.9" }
